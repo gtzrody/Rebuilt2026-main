@@ -13,6 +13,7 @@ import java.io.FileReader;
 public class Shootercalculations extends SubsystemBase {
  
     private final InterpolatingDoubleTreeMap m_hoodAngleTable = new InterpolatingDoubleTreeMap();
+    private final InterpolatingDoubleTreeMap m_flywheelRPMTable = new InterpolatingDoubleTreeMap();
  
     public Shootercalculations() {
         File deployDir = Filesystem.getDeployDirectory();
@@ -28,7 +29,9 @@ public class Shootercalculations extends SubsystemBase {
                 if (values.length >= 2) {
                     double distanceMeters    = Double.parseDouble(values[0].trim());
                     double hoodAngleDegrees  = Double.parseDouble(values[1].trim());
+                    double flywheelRPM      = Double.parseDouble(values[2].trim());
                     m_hoodAngleTable.put(distanceMeters, hoodAngleDegrees);
+                    m_flywheelRPMTable.put(distanceMeters, flywheelRPM);
                 }
             }
             System.out.println("[ShooterCalculations] shooter_data.csv loaded successfully.");
@@ -47,5 +50,9 @@ public class Shootercalculations extends SubsystemBase {
      */
     public double getHoodAngle(double distanceMeters) {
         return m_hoodAngleTable.get(distanceMeters);
+    }
+
+    public double getFlywheelRPM(double distanceMeters) {
+        return m_flywheelRPMTable.get(distanceMeters);
     }
 }

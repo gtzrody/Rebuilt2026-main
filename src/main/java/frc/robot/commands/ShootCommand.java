@@ -38,6 +38,7 @@ public ShootCommand(
 
       DoubleSupplier distanceSupplier  = () -> drivetrain.getDistanceToHub();
       DoubleSupplier hoodAngleSupplier = () -> shooterCalc.getHoodAngle(distanceSupplier.getAsDouble());
+     DoubleSupplier flywheelRPMSupplier = () -> shooterCalc.getFlywheelRPM(distanceSupplier.getAsDouble());
 
     addCommands(
 
@@ -57,10 +58,11 @@ public ShootCommand(
                 drivetrain
             ),
 
-            Commands.run(() -> shooter.setVelocitySetpoint(RPM.of(SHOOTER_RPM)), shooter)
-                .until(() -> Math.abs(shooter.getVelocity().in(RPM) - SHOOTER_RPM) < RPM_TOLERANCE)
-        ),
-
+            Commands.run(
+                    () -> shooter.setVelocitySetpoint(RPM.of(flywheelRPMSupplier.getAsDouble())),
+                    shooter
+                ).until(() -> Math.abs(shooter.getVelocity().in(RPM) - flywheelRPMSupplier.getAsDouble()) < RPM_TOLERANCE)
+            ),
 
         new ParallelCommandGroup(
 

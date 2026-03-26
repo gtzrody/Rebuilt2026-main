@@ -68,6 +68,8 @@ public class Intake extends SubsystemBase {
 
   private ArmConfig intakeCfg = new ArmConfig(IntakeController)
   // Starting position is where your arm starts
+  .withSoftLimits(Degrees.of(3), Degrees.of(130))
+  .withHardLimit(Degrees.of(3), Degrees.of(130))
   .withStartingPosition(Degrees.of(0))
   // Length and mass of your arm for sim.
   .withLength(Feet.of(3))
