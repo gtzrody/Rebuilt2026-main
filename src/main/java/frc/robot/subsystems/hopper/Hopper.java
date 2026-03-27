@@ -69,8 +69,6 @@ public class Hopper extends SubsystemBase {
   private ArmConfig HopperCfg = new ArmConfig(HopperController)
   // Starting position is where your arm starts
   .withStartingPosition(Degrees.of(0))
-  .withSoftLimits(Degrees.of(3), Degrees.of(130))
-  .withHardLimit(Degrees.of(3), Degrees.of(130))
   // Length and mass of your arm for sim.
   .withLength(Feet.of(3))
   .withMass(Pounds.of(1))

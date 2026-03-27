@@ -24,6 +24,7 @@ public class ShootCommand extends SequentialCommandGroup {
 private static final double SHOOTER_RPM = 2200.0;
 
 private static final double RPM_TOLERANCE = 100.0;
+private static final double ANGLE_TOLERANCE = 0.001;
 
 private final SwerveRequest.FieldCentric m_fieldCentric  = new SwerveRequest.FieldCentric();
 private final SwerveRequest.SwerveDriveBrake m_brake     = new SwerveRequest.SwerveDriveBrake();
@@ -45,35 +46,22 @@ public ShootCommand(
 
         new ParallelCommandGroup(
 
+            new AlignToHub(drivetrain, hubPID, shooterCalc),
+
             new FunctionalCommand(
-                () -> {},   
-                () -> drivetrain.setControl(
-                    m_fieldCentric
-                        .withVelocityX(0)
-                        .withVelocityY(0)
-                        .withRotationalRate(hubPID.getPIDCalculation())
-                ),
-                interrupted -> {}, // end
-                () -> hubPID.getController().atSetpoint(),
-                drivetrain
+                () -> shooter.setVelocitySetpoint(RPM.of(flywheelRPMSupplier.getAsDouble())),
+                () -> {},
+                interrupted -> {},
+                () -> (Math.abs(shooter.getVelocity().in(RPM) - flywheelRPMSupplier.getAsDouble()) < RPM_TOLERANCE),
+                shooter
             ),
-
-            Commands.run(
-                    () -> shooter.setVelocitySetpoint(RPM.of(flywheelRPMSupplier.getAsDouble())),
-                    shooter
-                ).until(() -> Math.abs(shooter.getVelocity().in(RPM) - flywheelRPMSupplier.getAsDouble()) < RPM_TOLERANCE)
-            ),
-
-        new ParallelCommandGroup(
-
-            drivetrain.applyRequest(() -> m_brake),
-
-            shooter.setVelocity(RPM.of(SHOOTER_RPM))
-
-            // Commands.run(
-            //         () -> hood.setAngleSetpoint(Degrees.of(hoodAngleSupplier.getAsDouble())),
-            //         hood
-            //     )
+            new FunctionalCommand(
+                () -> hood.setAngleAndStop(Degrees.of(hoodAngleSupplier.getAsDouble()), Degrees.of(ANGLE_TOLERANCE)),
+                () -> {},
+                interrupted -> {},
+                () -> true,
+                hood
+            )
         )
     );
 }

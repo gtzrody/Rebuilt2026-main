@@ -15,9 +15,9 @@ public class Constants {
     
  public static class SwerveConstants {
 
-        public static final double HUB_ROTATION_PID_KP = 10.0;
+        public static final double HUB_ROTATION_PID_KP = 5.0;
         public static final double HUB_ROTATION_PID_KI = 0.0;
-        public static final double HUB_ROTATION_PID_KD = 0.1;
+        public static final double HUB_ROTATION_PID_KD = 0.15;
 
          public static final double CLOSE_TRANSLATION_PP_KP = 1.5;
         public static final double CLOSE_TRANSLATION_PP_KI = 0.0;
