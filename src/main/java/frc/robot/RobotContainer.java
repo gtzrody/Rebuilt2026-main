@@ -35,6 +35,7 @@ import frc.robot.auto.LeftDriveAuto;
 import frc.robot.auto.RightDriveAuto;
 import frc.robot.constants.Constants.CameraConstants;
 import frc.robot.commands.ShootCommand;
+import frc.robot.subsystems.intake.Pivot;
 import frc.robot.subsystems.autoalignhood.Shootercalculations;
 import java.util.Set;
 import frc.robot.commands.FeedCommand;
@@ -62,6 +63,7 @@ public class RobotContainer {
     private final Intake m_intake = new Intake();
     private final Indexer m_index = new Indexer();
     private final Hopper m_hopper = new Hopper();
+    private final Pivot m_pivot = new Pivot();
     private final HubAlignmentPID m_hubPID = new HubAlignmentPID(drivetrain);
     private final Shootercalculations m_shooterCalc = new Shootercalculations();
     // private final Command swerveTeleop = new SwerveTeleop(drivetrain, joystick);
@@ -82,6 +84,7 @@ public class RobotContainer {
         // drivetrain.setDefaultCommand(swerveTeleop);
         m_intake.setDefaultCommand(m_intake.set(0));
         m_index.setDefaultCommand(m_index.set(0));
+        // m_pivot.setDefaultCommand(m_pivot.setAngle(Degrees.of(90)));
         m_hopper.setDefaultCommand(m_hopper.set(0));
         drivetrain.registerTelemetry(logger::telemeterize);
         m_Shooter.setDefaultCommand(m_Shooter.set(0));
@@ -113,9 +116,12 @@ public class RobotContainer {
 
         //Scoring Bindings
         joystick.leftTrigger().whileTrue(m_intake.set(0.80));
-        joystick.rightBumper().whileTrue(m_hopper.set(0.60));
-        joystick.rightTrigger().whileTrue(m_Shooter.setVelocity(RPM.of(1000)));
-        joystick.rightBumper().whileTrue(m_index.set(0.60));
+        joystick.leftTrigger().whileTrue(m_pivot.setAngle(Degrees.of(70)));
+        joystick.x().whileTrue(m_pivot.setAngle(Degrees.of(90)));
+
+        joystick.rightBumper().whileTrue(m_hopper.set(0.80));
+        joystick.y().toggleOnTrue(m_Shooter.setVelocity(RPM.of(500)));
+        joystick.rightBumper().whileTrue(m_index.set(0.80));
         joystick.leftBumper().whileTrue(
             Commands.defer(
                 () -> new ShootCommand(
@@ -123,9 +129,11 @@ public class RobotContainer {
                     m_hubPID,
                     m_Shooter,
                     m_hood,
-                    m_shooterCalc
+                    m_index,
+                    m_hopper,
+                    m_shooterCalc  
                 ),
-                Set.of(drivetrain, m_Shooter, m_hood)
+                Set.of(drivetrain, m_Shooter, m_hood, m_index, m_hopper)
             )
         );  
 
@@ -135,7 +143,6 @@ public class RobotContainer {
         //Hood Bindings
         joystick.povUp().whileTrue(m_hood.set(0.05));
         joystick.povDown().whileTrue(m_hood.set(-0.05));
-        // joystick.povDown().whileTrue(m_hood.setAngle(Degrees.of(10)));
 
         
         drivetrain.registerTelemetry(logger::telemeterize);

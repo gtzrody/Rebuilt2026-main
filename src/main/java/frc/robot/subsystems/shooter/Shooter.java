@@ -24,6 +24,7 @@ import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -50,6 +51,7 @@ public class Shooter extends SubsystemBase {
 
   TalonFX leftTalon = new TalonFX(13, new CANBus("canivore"));
   TalonFX rightTalon = new TalonFX(14, new CANBus("canivore"));
+  private double m_targetRPM = 0.0;
 
  TalonFXConfiguration vendorConfig = new TalonFXConfiguration();
 
@@ -111,6 +113,11 @@ SmartMotorController leftMotor = new TalonFXWrapper(leftTalon, DCMotor.getKraken
    // Shooter Mechanism
   private FlyWheel shooter = new FlyWheel(leftShooterConfig);
 
+  //Elastic Stuff
+  public void setTargetRPM(double rpm){
+    m_targetRPM = rpm;
+  }
+
   /**
    * Gets the current velocity of the shooter.
    *
@@ -171,6 +178,9 @@ SmartMotorController leftMotor = new TalonFXWrapper(leftTalon, DCMotor.getKraken
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    SmartDashboard.putNumber("FlyWheel Velocity", this.shooter.getSpeed().in(RPM));
+    SmartDashboard.putNumber("Flywheel Target RPM", m_targetRPM);
+
     shooter.updateTelemetry();
   }
 

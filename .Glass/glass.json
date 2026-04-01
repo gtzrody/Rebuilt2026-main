@@ -84,5 +84,8 @@
     "mode": "Client (NT4)",
     "serverTeam": "5293",
     "visible": false
+  },
+  "NetworkTables View": {
+    "visible": false
   }
 }

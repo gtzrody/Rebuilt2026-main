@@ -1,8 +1,4 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
-package frc.robot.subsystems.hood;
+package frc.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
@@ -23,6 +19,9 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.constants.Constants.MechanismConstants;
+import yams.gearing.GearBox;
+import yams.gearing.MechanismGearing;
 import yams.mechanisms.SmartMechanism;
 import yams.mechanisms.config.ArmConfig;
 import yams.mechanisms.positional.Arm;
@@ -38,40 +37,36 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
-public class Hood extends SubsystemBase {
+public class Pivot extends SubsystemBase {
 
   private SmartMotorControllerConfig smcConfig = new SmartMotorControllerConfig(this)
   .withControlMode(ControlMode.CLOSED_LOOP)
-  .withClosedLoopController(30, 0, 0  , DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
-  .withSimClosedLoopController(0, 0, 0, DegreesPerSecond.of(90), DegreesPerSecondPerSecond.of(45))
-  .withFeedforward(new ArmFeedforward(0.35, 0, 0))
-  .withSimFeedforward(new ArmFeedforward(0, 0, 0))
-  .withTelemetry("HoodMotor", TelemetryVerbosity.HIGH)
-  // Gearing from the motor rotor to final shaft.
-  // In this example GearBox.fromReductionStages(3,4) is the same as GearBox.fromStages("3:1","4:1") which corresponds to the gearbox attached to your motor.
-  .withGearing(36)
+  .withClosedLoopController(50, 0, 0)
+  .withFeedforward(new ArmFeedforward(0.2, 2, 0))
+  .withTelemetry("IntakeMotor", TelemetryVerbosity.HIGH)
+   .withGearing(new MechanismGearing(new GearBox(MechanismConstants.intake_pivot_gearbox)))
+//   .withGearing(new MechanismGearing(GearBox.fromStages("23:12","42:16","30:15","36:12")))
   // Motor properties to prevent over currenting.
   .withMotorInverted(false)
   .withIdleMode(MotorMode.BRAKE)    
-  .withStatorCurrentLimit(Amps.of(90))
   .withClosedLoopRampRate(Seconds.of(0.25))
   .withOpenLoopRampRate(Seconds.of(0.25));
 
   // Vendor motor controller object
-    TalonFX hoodFx = new TalonFX(17, new CANBus("canivore"));
+    TalonFX pivotFx = new TalonFX(15, new CANBus("canivore"));
 
 
   // Create our SmartMotorController from our Spark and config with the NEO.
-  SmartMotorController hoodController = new TalonFXWrapper(hoodFx, DCMotor.getKrakenX60(1), smcConfig);
+  SmartMotorController pivotController = new TalonFXWrapper(pivotFx, DCMotor.getKrakenX60(1), smcConfig);
 
 
-  private ArmConfig armCfg = new ArmConfig(hoodController)
+  private ArmConfig armCfg = new ArmConfig(pivotController)
   // Soft limit is applied to the SmartMotorControllers PID
-  .withSoftLimits(Degrees.of(3), Degrees.of(130))
+  .withSoftLimits(Degrees.of(-180), Degrees.of(130))
   // Hard limit is applied to the simulation.
-  .withHardLimit(Degrees.of(3), Degrees.of(130))
+  .withHardLimit(Degrees.of(-180), Degrees.of(130))
   // Starting position is where your arm starts
-  .withStartingPosition(Degrees.of(0))
+  .withStartingPosition(Degrees.of(90))
   // Length and mass of your arm for sim.
   .withLength(Feet.of(3))
   .withMass(Pounds.of(1))
@@ -79,14 +74,14 @@ public class Hood extends SubsystemBase {
   .withTelemetry("Arm", TelemetryVerbosity.HIGH);
 
   // Arm Mechanism
-  private Arm arm = new Arm(armCfg);
+  private Arm pivot = new Arm(armCfg);
 
   /**
    * Set the angle of the arm, does not stop when the arm reaches the setpoint.
    * @param angle Angle to go to.
    * @return A command.
    */
-  public Command setAngle(Angle angle) { return arm.run(angle);}
+  public Command setAngle(Angle angle) { return pivot.run(angle);}
   
   /**
    * Set the angle of the arm, ends the command but does not stop the arm when the arm reaches the setpoint.
@@ -94,29 +89,29 @@ public class Hood extends SubsystemBase {
    * @param tolerance Angle tolerance for completion.
    * @return A Command
    */
-  public Command setAngleAndStop(Angle angle, Angle tolerance) { return arm.runTo(angle, tolerance);}
+  public Command setAngleAndStop(Angle angle, Angle tolerance) { return pivot.runTo(angle, tolerance);}
   
   /**
    * Set arm closed loop controller to go to the specified mechanism position.
    * @param angle Angle to go to.
    */
-  public void setAngleSetpoint(Angle angle) { arm.setMechanismPositionSetpoint(angle); }
+  public void setAngleSetpoint(Angle angle) { pivot.setMechanismPositionSetpoint(angle); }
 
   /**
    * Move the arm up and down.
    * @param cycle [-1, 1] speed to set the arm too.
    */
-  public Command set(double cycle) { return arm.set(cycle);}
+  public Command set(double cycle) { return pivot.set(cycle);}
 
-  public Angle getAngle() { return arm.getAngle(); }
+  public Angle getAngle() { return pivot.getAngle(); }
 
   /**
    * Run sysId on the {@link Arm}
    */
-  public Command sysId() { return arm.sysId(Volts.of(7), Volts.of(2).per(Second), Seconds.of(4));}
+  public Command sysId() { return pivot.sysId(Volts.of(7), Volts.of(2).per(Second), Seconds.of(4));}
 
   /** Creates a new ExampleSubsystem. */
-  public Hood() {}
+  public Pivot() {}
 
   /**
    * Example command factory method.
@@ -145,14 +140,15 @@ public class Hood extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    arm.updateTelemetry();
-    SmartDashboard.putNumber("Hood Encoder Ticks", this.arm.getAngle().magnitude());
+    pivot.updateTelemetry();
+     SmartDashboard.putNumber("Pivot Encoder Ticks", this.pivot.getAngle().magnitude());
+
 
   }
 
   @Override
   public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation
-    arm.simIterate();
+    pivot.simIterate();
   }
 }

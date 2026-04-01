@@ -40,6 +40,8 @@ public class Constants {
 
     public static class MechanismConstants {
         public static final double [] shooter_gearbox = {36.0/25.0};
+        public static final double [] intake_pivot_gearbox = {30.1875};
+
     }
 
 
