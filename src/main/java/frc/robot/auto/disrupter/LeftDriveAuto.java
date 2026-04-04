@@ -1,4 +1,4 @@
-package frc.robot.auto;
+package frc.robot.auto.disrupter;
 
 import java.io.IOException;
 import org.json.simple.parser.ParseException;

@@ -17,8 +17,6 @@ import frc.robot.subsystems.HubAlignmentPID;
 import frc.robot.subsystems.autoalignhood.Shootercalculations;
 import frc.robot.subsystems.hood.Hood;
 import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.hopper.Hopper;
-import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.swerve.CommandSwerveDrivetrain;
 
 
@@ -26,8 +24,8 @@ public class ShootCommand extends SequentialCommandGroup {
 
 private static final double SHOOTER_RPM = 2200.0;
 
-private static final double RPM_TOLERANCE = 300.0;
-private static final double ANGLE_TOLERANCE = 0.05;
+private static final double RPM_TOLERANCE = 100.0;
+private static final double ANGLE_TOLERANCE = 0.001;
 
 private final SwerveRequest.FieldCentric m_fieldCentric  = new SwerveRequest.FieldCentric();
 private final SwerveRequest.SwerveDriveBrake m_brake     = new SwerveRequest.SwerveDriveBrake();
@@ -37,8 +35,6 @@ public ShootCommand(
         HubAlignmentPID         hubPID,
         Shooter                 shooter,
         Hood                    hood,
-        Indexer                 indexer,
-        Hopper                  hopper,
         Shootercalculations     shooterCalc) {
 
 
@@ -67,27 +63,6 @@ public ShootCommand(
                 () -> true,
                 hood
             )
-        ),
-            new ParallelCommandGroup(
-                
-            new FunctionalCommand(
-                () -> shooter.setVelocitySetpoint(RPM.of(flywheelRPMSupplier.getAsDouble())),
-                () -> shooter.setVelocitySetpoint(RPM.of(flywheelRPMSupplier.getAsDouble())),
-                interrupted -> {},
-                () -> false,
-                shooter
-            ),
-
-             new FunctionalCommand(
-                () -> hood.setAngleSetpoint(Degrees.of(hoodAngleSupplier.getAsDouble())),
-                () -> hood.setAngleSetpoint(Degrees.of(hoodAngleSupplier.getAsDouble())),
-                interrupted -> {},
-                () -> false,
-                hood
-            ),
-
-            indexer.set(0.60),
-            hopper.set(0.80)
         )
     );
 }

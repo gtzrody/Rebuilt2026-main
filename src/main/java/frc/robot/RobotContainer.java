@@ -31,9 +31,15 @@ import frc.robot.subsystems.hood.Hood;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.indexer.Indexer;
 import frc.robot.subsystems.hopper.Hopper;
-import frc.robot.auto.LeftDriveAuto;
-import frc.robot.auto.RightDriveAuto;
+import frc.robot.auto.disrupter.LeftDriveAuto;
+import frc.robot.auto.disrupter.RightDriveAuto;
 import frc.robot.constants.Constants.CameraConstants;
+import frc.robot.subsystems.hopper.HopperFlyWheel;
+import frc.robot.subsystems.indexer.IndexerFlyWheel;
+import frc.robot.subsystems.intake.IntakeFlyWheel;
+
+
+
 import frc.robot.commands.ShootCommand;
 import frc.robot.subsystems.intake.Pivot;
 import frc.robot.subsystems.autoalignhood.Shootercalculations;
@@ -52,18 +58,25 @@ public class RobotContainer {
     //Subsystems
     private final CommandXboxController joystick = new CommandXboxController(0);
     private final CommandXboxController op_joystick = new CommandXboxController(1);
+
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
             .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
+
     private final Hood m_hood = new Hood();
     private final Shooter m_Shooter = new Shooter();
     private final Intake m_intake = new Intake();
     private final Indexer m_index = new Indexer();
     private final Hopper m_hopper = new Hopper();
     private final Pivot m_pivot = new Pivot();
+
+    // private final IndexerFlyWheel m_flyindex = new IndexerFlyWheel();
+    // private final HopperFlyWheel m_flyhopper = new HopperFlyWheel();
+    // private final IntakeFlyWheel m_flyintake = new IntakeFlyWheel();
+    
     private final HubAlignmentPID m_hubPID = new HubAlignmentPID(drivetrain);
     private final Shootercalculations m_shooterCalc = new Shootercalculations();
     // private final Command swerveTeleop = new SwerveTeleop(drivetrain, joystick);
@@ -84,6 +97,10 @@ public class RobotContainer {
         // drivetrain.setDefaultCommand(swerveTeleop);
         m_intake.setDefaultCommand(m_intake.set(0));
         m_index.setDefaultCommand(m_index.set(0));
+        // m_flyindex.setDefaultCommand(m_Shooter.set(0));
+        // m_flyhopper.setDefaultCommand(m_Shooter.set(0));
+        // m_flyintake.setDefaultCommand(m_Shooter.set(0));
+
         // m_pivot.setDefaultCommand(m_pivot.setAngle(Degrees.of(90)));
         m_hopper.setDefaultCommand(m_hopper.set(0));
         drivetrain.registerTelemetry(logger::telemeterize);
@@ -111,16 +128,20 @@ public class RobotContainer {
 
         //Swerve/Vision Bindings
         joystick.rightTrigger().whileTrue(drivetrain.applyRequest(() -> brake));
-        // joystick.leftBumper().whileTrue(leftHubAutoDrive);
-        // joystick.rightBumper().whileTrue(rightHubAutoDrive);
+          
 
         //Scoring Bindings
-        joystick.leftTrigger().whileTrue(m_intake.set(0.80));
-        joystick.leftTrigger().whileTrue(m_pivot.setAngle(Degrees.of(70)));
-        joystick.x().whileTrue(m_pivot.setAngle(Degrees.of(90)));
+        // joystick.leftTrigger().whileTrue(m_flyintake.set(0.60));
+        joystick.leftTrigger().whileTrue(m_intake.set(0.60));
+        joystick.x().whileTrue(m_pivot.setAngle(Degrees.of(-8)));
+        joystick.y().whileTrue(m_pivot.setAngle(Degrees.of(90)));
 
+ 
+        // joystick.rightBumper().whileTrue(m_flyhopper.set(0.80));
+        // joystick.rightBumper().whileTrue(m_flyindex.set(0.80));
+        
         joystick.rightBumper().whileTrue(m_hopper.set(0.80));
-        joystick.y().toggleOnTrue(m_Shooter.setVelocity(RPM.of(500)));
+        // joystick.y().toggleOnTrue(m_Shooter.setVelocity(RPM.of(500)));
         joystick.rightBumper().whileTrue(m_index.set(0.80));
         joystick.leftBumper().whileTrue(
             Commands.defer(
@@ -129,11 +150,9 @@ public class RobotContainer {
                     m_hubPID,
                     m_Shooter,
                     m_hood,
-                    m_index,
-                    m_hopper,
                     m_shooterCalc  
                 ),
-                Set.of(drivetrain, m_Shooter, m_hood, m_index, m_hopper)
+                Set.of(drivetrain, m_Shooter, m_hood)
             )
         );  
 

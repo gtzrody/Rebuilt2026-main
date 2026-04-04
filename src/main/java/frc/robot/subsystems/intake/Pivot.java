@@ -46,9 +46,8 @@ public class Pivot extends SubsystemBase {
   .withTelemetry("IntakeMotor", TelemetryVerbosity.HIGH)
    .withGearing(new MechanismGearing(new GearBox(MechanismConstants.intake_pivot_gearbox)))
 //   .withGearing(new MechanismGearing(GearBox.fromStages("23:12","42:16","30:15","36:12")))
-  // Motor properties to prevent over currenting.
   .withMotorInverted(false)
-  .withIdleMode(MotorMode.BRAKE)    
+  .withIdleMode(MotorMode.BRAKE)
   .withClosedLoopRampRate(Seconds.of(0.25))
   .withOpenLoopRampRate(Seconds.of(0.25));
 
@@ -62,9 +61,9 @@ public class Pivot extends SubsystemBase {
 
   private ArmConfig armCfg = new ArmConfig(pivotController)
   // Soft limit is applied to the SmartMotorControllers PID
-  .withSoftLimits(Degrees.of(-180), Degrees.of(130))
+  .withSoftLimits(Degrees.of(-15), Degrees.of(100))
   // Hard limit is applied to the simulation.
-  .withHardLimit(Degrees.of(-180), Degrees.of(130))
+  .withHardLimit(Degrees.of(-15), Degrees.of(100))
   // Starting position is where your arm starts
   .withStartingPosition(Degrees.of(90))
   // Length and mass of your arm for sim.
